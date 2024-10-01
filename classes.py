@@ -2,12 +2,13 @@
 class BreathingPattern:
     """Represents a breathing pattern with inhaling and exhaling times"""
 
-    def __init__(self, inhaling_time, exhaling_time):
+    def __init__(self, inhaling_time, exhaling_time, holding_time):
         """Initializes a new BreathingPattern object
         args: t_inh (float) in seconds, t_exh (float) in seconds
         """
         self.t_inh = inhaling_time
         self.t_exh = exhaling_time
+        self.t_hold = holding_time
 
     def get_t_inh(self):
         return self.t_inh
@@ -15,11 +16,8 @@ class BreathingPattern:
     def get_t_exh(self):
         return self.t_exh
 
-    def set_t_inh(self, new_inhaling_time):
-        self.t_inh = new_inhaling_time
-
-    def set_t_exh(self, new_exhaling_time):
-        self.t_exh = new_exhaling_time
+    def get_t_hold(self):
+        return self.t_hold
 
     def __str__(self):
         """Returns a string representation of the breathing pattern"""
