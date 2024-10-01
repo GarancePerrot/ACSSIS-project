@@ -13,41 +13,62 @@ def main():
     """Does the experiment"""
     
     sense = SenseHat()
-    # ROHIT : | - here goes the part where we connect with the SenseHat etc...
-    #         | - we shoud add an option where the player does an action to stop
-    #           the program at any time of the game 
-    #         | - we should check if the sensehat can output messages like to describe 
-    #           the instructions
       
+    # RGB colors and their complements
+    red = (255,0,0)
+    cyan = (0,255,255)
+    green = (0, 255,0)
+    magenta = (255,0,255)
+    blue = (0, 0,255)
+    yellow = (255, 255, 0)
     
-    
-    
-    #step 1 : 
-    initial_BP, initial_RT = step_1(sense)
-    
-    #transition : 
-    set_timer()
-    
-    #step 2 : 
-    # For now we suggest a fixed BP with 5 seconds inhale and 5 seconds exhale. 
-    # Further improvements : suggest other breathing patterns based on further reseach 
-    
-    flag = 1
-    
-    while flag : #user has to follow a BP and play to RT game over and over until its 
-        # RT has been well improved (compared to its initial RT)
+    program_running = True
+
+    while program_running : 
         
-        suggested_BP = BreathingPattern(5,5) # for now, we don't have any new suggestions, 
-        # but we still make the user play again to step 2 
-        new_RT = step_2(suggested_BP)
+        if check_for_exit(sense): #if the player holds the center button for 5 seconds, we exit the program
+            program_running = False 
+            break
+    
+        #step 1 : 
+        initial_BP, initial_RT = step_1(sense)
         
-        dif = measure_difference_RTs(initial_RT, new_RT)
+        #transition : 
+        set_timer()
         
-        if dif < 0.001 : 
-            print("New reaction time has been well improved, game stops now. ")
-            flag = 0
-        else : 
-            print("New reaction time is too long, try again with a new breathing pattern suggestion.")
+        #step 2 : 
+        # For now we suggest a fixed BP with 5 seconds inhale and 5 seconds exhale. 
+        # Further improvements : suggest other breathing patterns based on further reseach 
+        # (for e.g with 5 seconds hold between inhale and exhale)
+        
+        flag = 1
+        
+        while flag : #user has to follow a BP and play to RT game over and over until its 
+            # RT has been well improved (compared to its initial RT)
+            
+            if check_for_exit(sense):  #checking again if player wants to exit
+                program_running = False
+                break
+            
+            new_BP = BreathingPattern(5,5, 0) # for now we don't have any new suggestions, 
+            # but we still make the user play again to step 2 
+            new_RT = step_2(new_BP)
+            
+            dif = measure_difference_RTs(initial_RT, new_RT)
+            
+            if dif < 0.001 :
+                sense.show_message("New reaction time has been well improved, game stops now.", text_colour=yellow, back_colour=blue, scroll_speed=0.1) 
+                flag = 0
+            else : 
+                sense.show_message("New reaction time is too long, try again with a new breathing pattern suggestion.", text_colour=yellow, back_colour=blue, scroll_speed=0.1)
+        #end while
+    #end while
+    
+    sense.clear()    
+    return
+
+   
+
     
     # game stops 
 
@@ -85,8 +106,9 @@ def deduce_breathing_pattern(sense, duration=15):
     if inhaling_times and exhaling_times:
         mean_inhaling_time = sum(inhaling_times) / len(inhaling_times)
         mean_exhaling_time = sum(exhaling_times) / len(exhaling_times)
-        return BreathingPattern(mean_inhaling_time, mean_exhaling_time)
+        return BreathingPattern(mean_inhaling_time, mean_exhaling_time, 0)
     else:
+        sense.show_message("Breathing pattern measurement failed, try again.",text_colour= (255, 255, 0), back_colour=(0,0,255), scroll_speed=0.1)
         return None 
     
 
@@ -108,11 +130,12 @@ def measure_simple_reaction_time(sense, duration=20):
         #randomly light up a LED : 
         x, y = randint(0, 7), randint(0, 7) #random coordinates for a LED
         sense.set_pixel(x, y, (255, 255, 255)) # sets pixel to white
+        led_on_time = time()
 
         #we wait for the user to press the Enter key : 
         event = sense.stick.wait_for_press()
         if event.action == "pressed":
-            RT = time() - start_time
+            RT = time() - led_on_time
             reaction_times.append(RT)
             sense.clear() # lights off the pixel
 
@@ -121,6 +144,7 @@ def measure_simple_reaction_time(sense, duration=20):
         mean_RT = sum(reaction_times) / len(reaction_times)
         return SimpleRT(mean_RT)
     else:
+        sense.show_message("Reaction Time measurement failed, try again.",text_colour= (255, 255, 0), back_colour=(0,0,255), scroll_speed=0.1)
         return None  
     
     
@@ -129,14 +153,14 @@ def step_1(sense): #returns the initial BP and RT
     # Tracking the player’s initial breathing & reaction time 
     BP = deduce_breathing_pattern(sense)
     if BP is None : 
-        print("Failed to measure initial breathing pattern")
+        sense.show_message("Failed to measure initial breathing pattern", text_colour= (255, 255, 0), back_colour=(0,0,255), scroll_speed=0.1)
     
     
     # for now we are just using a simple RT 
     # further improvements : do experiments for recognition RT and choice RT 
     RT = measure_simple_reaction_time(sense)
     if RT is None : 
-        print("Failed to measure initial reaction time")
+        sense.show_message("Failed to measure initial reaction time", text_colour= (255, 255, 0), back_colour=(0,0,255), scroll_speed=0.1)
         
     return BP, RT 
         
@@ -155,7 +179,7 @@ def set_timer(seconds=60):
 # STEP 2 : 
 
 
-def suggested_BP(sense, duration=20, t_inh=5, t_exh=5): #void
+def suggested_BP(sense, duration=20, t_inh=5, t_exh=5, t_hold=0): #void called in step 2
     """Suggests a breathing pattern where the rows of LED matrix light up 
     and down according to the inhaling time t_inh and exhaling time t_exh. 
     args: duration (int): The duration in seconds, default 20 sec
@@ -172,18 +196,26 @@ def suggested_BP(sense, duration=20, t_inh=5, t_exh=5): #void
     start_time = time()
 
    
+   # divide the whole inhaling or exhaling time by 8 (nb rows) to light up at a regular pace
+    ti = t_inh/8
+    te = t_exh/8
+    
+    
     while time() - start_time < duration:
         # INHALE : light up the rows from bottom to top
         for row in range(7, -1, -1): #reverse iteration
             for x in range(8):
                 sense.set_pixel(x, row, (255, 255, 255))
-            sleep(t_inh) 
+                sleep(ti) 
+                
+        #HOLD : 
+        sleep(t_hold)
 
         # EXHALE : turn off the rows from top to bottom
         for row in range(8):
             for x in range(8):
                 sense.set_pixel(x, row, (0, 0, 0))
-            sleep(t_exh)
+                sleep(te)
 
 
 
@@ -195,12 +227,13 @@ def step_2(sense, BP):
     
     inh = BP.get_t_inh()
     exh = BP.get_t_exh()
+    hold = BP.get_t_hold()
     
-    suggested_BP(sense, duration = 20, t_inh=inh, t_exh=exh) 
+    suggested_BP(sense, duration = 20, t_inh=inh, t_exh=exh, t_hold=hold) 
     
     new_RT = measure_simple_reaction_time(sense)
     if new_RT is None : 
-        print("Failed to measure new reaction time")
+        sense.show_message("Failed to measure new reaction time", text_colour= (255, 255, 0), back_colour=(0,0,255), scroll_speed=0.1)
         
     return new_RT
 
@@ -214,4 +247,26 @@ def measure_difference_RTs(initial_RT, new_RT):
     i_RT = initial_RT.value
     n_RT = new_RT.value
     
-    return i_RT - n_RT  #not using abs() because we want to make sure that the new is less than the initial        
+    return i_RT - n_RT  #not using abs() because we want to make sure that the new is less than the initial  
+
+
+
+
+#___________________________________________________________________________________________________________
+# Exiting the program : 
+
+def check_for_exit(sense, hold_time=5):
+    """Checks if the user holds the center button for `hold_time` seconds to exit."""
+    start_hold_time = None  
+    for event in sense.stick.get_events():
+        if event.action == "pressed" and event.direction == "middle":   #we start counting when the middle button is pressed    
+            start_hold_time = time()
+            
+        elif event.action == "released" and event.direction == "middle" and start_hold_time: #if the button is released before hold_time seconds, reset the timer
+            start_hold_time = None
+            
+        elif event.action == "held" and event.direction == "middle" and start_hold_time: #if the button has been held for `hold_time` seconds
+            if time() - start_hold_time >= hold_time:
+                sense.show_message("Exiting the game", text_colour= (255, 255, 0), back_colour=(0,0,255), scroll_speed=0.1)
+                return True
+    return False           
