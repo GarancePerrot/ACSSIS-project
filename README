@@ -6,14 +6,40 @@ Garance & Rohit: try to run code and improve , make it work
 -> 1st version of code that is working 
 
 
-
 Liu : search for papers about breathing patterns / exercises, their effect on brain activity. 
 read & take notes
 -> come up with a variety of suggestions for breathing patterns 
 
+Tasks above due for Tuesday 08th October ! __________________________________________________
+
+_____________________________________________________________________________________________
+Future improvements (coding) : 
 
 
+1) Optimizing LED lighting and performance
+In suggested_BP(), the lighting of individual pixels happens sequentially with sleep() calls. 
+This might lead to performance lag or undesired effects if the time intervals are too small.
+Consider separating the LED matrix updates from user input to ensure smoother operation,
+possibly by using asynchronous functions (though the Sense HAT API does not natively support
+async). For example, the matrix update could happen in a separate thread, allowing more
+efficient and non-blocking execution.
 
--> add those dif suggestions to the code 
 
--> do our first tests 
+2) Breathing pattern flexibility 
+Add more suggestions of BP in step_2()
+
+
+3) To discuss : Saving data ?
+Maybe log the user's breathing patterns and reaction times to a file for further analysis or for 
+providing feedback on their performance over multiple sessions.
+
+4) User feedback : 
+Providing additional real-time feedback to the user during the reaction time game or breathing 
+exercise. For example, you could update the LED matrix to reflect progress, such as displaying
+a different color as the user gets closer to completing the breathing pattern or reacting more
+quickly.
+
+5) Considering edge cases 
+Handle edge cases such as if the user doesn’t press anything or presses incorrect buttons during 
+the reaction time game. Also, ensure that None values in deduce_breathing_pattern or
+measure_simple_reaction_time are dealt with more robustly.
