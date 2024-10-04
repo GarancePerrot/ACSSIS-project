@@ -11,7 +11,6 @@ from classes import *
 
 def main():
     """Does the experiment"""
-    
     sense = SenseHat()
       
     # RGB colors and their complements
@@ -91,7 +90,7 @@ def deduce_breathing_pattern(sense, duration=15):
 
     #continuously waiting for button press (during specified duration)
     while time() - start_time < duration:
-        event = sense.stick.wait_for_press()
+        event = sense.stick.wait_for_event()
         if event.action == "pressed":          #user input : 
             if event.direction == "up":  # User pressed up arrow, start inhaling
                 if not inhaling_times or exhaling_times:
@@ -270,3 +269,7 @@ def check_for_exit(sense, hold_time=5):
                 sense.show_message("Exiting the game", text_colour= (255, 255, 0), back_colour=(0,0,255), scroll_speed=0.1)
                 return True
     return False           
+
+
+if __name__ == "__main__":
+    main()
