@@ -49,9 +49,9 @@ def main():
                 program_running = False
                 break
             
-            #new_BP = BreathingPattern(5,5, 0) # for now we don't have any new suggestions, 
+            new_BP = BreathingPattern(5,5, 0) # for now we don't have any new suggestions, 
             # but we still make the user play again to step 2 
-            #new_RT = step_2(new_BP)
+            new_RT = step_2(new_BP)
             
             dif = measure_difference_RTs(initial_RT, new_RT)
             
@@ -91,8 +91,6 @@ def deduce_breathing_pattern(sense, duration=10):
     sense.clear()
     #continuously waiting for button press (during specified duration)
     while time() - start_time < duration:
-        print(time() - start_time)
-        print(time() - start_time - duration)
         event= sense.stick.wait_for_event()
         if event.action == "pressed":          #user input : 
             if event.direction == "up":  # User pressed up arrow, start inhaling
@@ -174,7 +172,7 @@ def step_1(sense): #returns the initial BP and RT
 def set_timer(seconds=60): 
     """Sets a timer for a specified number of seconds.
     args : seconds (int, optional), default to 60"""
-    time.sleep(seconds)
+    sleep(seconds)
     
     
 #__________________________________________________________________________________________
