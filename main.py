@@ -49,9 +49,9 @@ def main():
                 program_running = False
                 break
             
-            new_BP = BreathingPattern(5,5, 0) # for now we don't have any new suggestions, 
+            #new_BP = BreathingPattern(5,5, 0) # for now we don't have any new suggestions, 
             # but we still make the user play again to step 2 
-            new_RT = step_2(new_BP)
+            #new_RT = step_2(new_BP)
             
             dif = measure_difference_RTs(initial_RT, new_RT)
             
@@ -77,36 +77,39 @@ def main():
 
 
 
-def deduce_breathing_pattern(sense, duration=15):
+def deduce_breathing_pattern(sense, duration=10):
     # User presses up arrow just before inhaling, inhales, then presses down arrow, then exhales, and so on
     # for a specific duration of time 
     """Deduces the breathing pattern from user button presses.
-    args: duration (int, optional): The duration in seconds to measure the breathing pattern. Defaults to 15.
+    args: duration (int, optional): The duration in seconds to measure the breathing pattern. Defaults to 10.
     returns the measured breathing pattern """
 
     start_time = time()
     inhaling_times = []
     exhaling_times = []
-
+    print("Deducing BP")
+    sense.clear()
     #continuously waiting for button press (during specified duration)
     while time() - start_time < duration:
-        event = sense.stick.wait_for_event()
+        print(time() - start_time)
+        print(time() - start_time - duration)
+        event= sense.stick.wait_for_event()
         if event.action == "pressed":          #user input : 
             if event.direction == "up":  # User pressed up arrow, start inhaling
-                if not inhaling_times or exhaling_times:
-                    start_time = time()
+                print("Inhale")
+                inhaling_times.append(time() - start_time)
             elif event.direction == "down":  # User pressed down arrow, start exhaling
-                if inhaling_times and not exhaling_times:
-                    inhaling_times.append(time() - start_time)
-                elif exhaling_times and not inhaling_times:
-                    exhaling_times.append(time() - start_time)
-
+                print("exhale")
+                exhaling_times.append(time() - start_time)
+    print ("Done.. calculating")
     #doing a mean of I and E times over the period, and then storing this information
     if inhaling_times and exhaling_times:
         mean_inhaling_time = sum(inhaling_times) / len(inhaling_times)
         mean_exhaling_time = sum(exhaling_times) / len(exhaling_times)
+        print("mean inhale, mean exhale",mean_inhaling_time, mean_exhaling_time)
         return BreathingPattern(mean_inhaling_time, mean_exhaling_time, 0)
     else:
+        print("Error")
         sense.show_message("Breathing pattern measurement failed, try again.",text_colour= (255, 255, 0), back_colour=(0,0,255), scroll_speed=0.1)
         return None 
     
@@ -132,7 +135,7 @@ def measure_simple_reaction_time(sense, duration=20):
         led_on_time = time()
 
         #we wait for the user to press the Enter key : 
-        event = sense.stick.wait_for_press()
+        event = sense.stick.wait_for_event()
         if event.action == "pressed":
             RT = time() - led_on_time
             reaction_times.append(RT)
