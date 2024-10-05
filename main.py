@@ -33,7 +33,7 @@ def main():
         initial_BP, initial_RT = step_1(sense)
         
         #transition : 
-        set_timer()
+        set_timer(sense)
         
         #step 2 : 
         # For now we suggest a fixed BP with 5 seconds inhale and 5 seconds exhale. 
@@ -84,10 +84,11 @@ def deduce_breathing_pattern(sense, duration=10):
     args: duration (int, optional): The duration in seconds to measure the breathing pattern. Defaults to 10.
     returns the measured breathing pattern """
 
+    print("Entering deduce_breathing_pattern\n")
+    
     start_time = time()
     inhaling_times = []
     exhaling_times = []
-    print("Deducing BP")
     sense.clear()
     #continuously waiting for button press (during specified duration)
     while time() - start_time < duration:
@@ -97,7 +98,7 @@ def deduce_breathing_pattern(sense, duration=10):
                 print("Inhale")
                 inhaling_times.append(time() - start_time)
             elif event.direction == "down":  # User pressed down arrow, start exhaling
-                print("exhale")
+                print("Exhale")
                 exhaling_times.append(time() - start_time)
     print ("Done.. calculating")
     #doing a mean of I and E times over the period, and then storing this information
@@ -107,17 +108,19 @@ def deduce_breathing_pattern(sense, duration=10):
         print("mean inhale, mean exhale",mean_inhaling_time, mean_exhaling_time)
         return BreathingPattern(mean_inhaling_time, mean_exhaling_time, 0)
     else:
-        print("Error")
-        sense.show_message("Breathing pattern measurement failed, try again.",text_colour= (255, 255, 0), back_colour=(0,0,255), scroll_speed=0.1)
+        print("Error: deduce_breathing_pattern\n")
+        sense.show_message("BP : try again",text_colour= (255, 255, 0), back_colour=(0,0,255), scroll_speed=0.1)
         return None 
     
 
 
-def measure_simple_reaction_time(sense, duration=20):
+def measure_simple_reaction_time(sense, duration=15):
     """Reaction Time game for simple reaction time. 
     args : duration (int, optional): The duration in seconds for the experiment. Defaults to 20.
     returns : SimpleRT, the measured simple reaction time
     """
+    
+    print("Entering measure_simple_reaction_time\n")
 
     start_time = time()
     reaction_times = []
@@ -142,26 +145,31 @@ def measure_simple_reaction_time(sense, duration=20):
     # we compute the mean of the reaction times over the period and store it : 
     if reaction_times:
         mean_RT = sum(reaction_times) / len(reaction_times)
+        print("computed mean RT : ", mean_RT )
         return SimpleRT(mean_RT)
     else:
-        sense.show_message("Reaction Time measurement failed, try again.",text_colour= (255, 255, 0), back_colour=(0,0,255), scroll_speed=0.1)
+        print("Error: measure_simple_RT")
+        sense.show_message("RT: try again",text_colour= (255, 255, 0), back_colour=(0,0,255), scroll_speed=0.1)
         return None  
     
     
 def step_1(sense): #returns the initial BP and RT 
     
+    print("Entering step 1")
+    
     # Tracking the player’s initial breathing & reaction time 
     BP = deduce_breathing_pattern(sense)
     if BP is None : 
-        sense.show_message("Failed to measure initial breathing pattern", text_colour= (255, 255, 0), back_colour=(0,0,255), scroll_speed=0.1)
+        print("Failed to measure initial breathing pattern")
     
     
     # for now we are just using a simple RT 
     # further improvements : do experiments for recognition RT and choice RT 
     RT = measure_simple_reaction_time(sense)
     if RT is None : 
-        sense.show_message("Failed to measure initial reaction time", text_colour= (255, 255, 0), back_colour=(0,0,255), scroll_speed=0.1)
+        print("Failed to measure initial reaction time")
         
+    print("Step 1 done")
     return BP, RT 
         
         
@@ -169,9 +177,11 @@ def step_1(sense): #returns the initial BP and RT
 #   TRANSITION : 
 
         
-def set_timer(seconds=60): 
+def set_timer(sense, seconds=60): 
     """Sets a timer for a specified number of seconds.
     args : seconds (int, optional), default to 60"""
+    print("Transition of 1 min")
+    sense.show_message("Relax",text_colour= (255, 255, 0), back_colour=(0,0,255), scroll_speed=0.1)
     sleep(seconds)
     
     
@@ -193,6 +203,8 @@ def suggested_BP(sense, duration=20, t_inh=5, t_exh=5, t_hold=0): #void called i
     # down when starting to exhale, and we measure the difference between when all the rows 
     # are enlightened and when he presses the up arrow)
     
+    print("Entering suggested_BP")
+    
     start_time = time()
 
    
@@ -203,15 +215,18 @@ def suggested_BP(sense, duration=20, t_inh=5, t_exh=5, t_hold=0): #void called i
     
     while time() - start_time < duration:
         # INHALE : light up the rows from bottom to top
+        print("inhale")
         for row in range(7, -1, -1): #reverse iteration
             for x in range(8):
                 sense.set_pixel(x, row, (255, 255, 255))
                 sleep(ti) 
-                
+           
+        print("hold")     
         #HOLD : 
         sleep(t_hold)
 
         # EXHALE : turn off the rows from top to bottom
+        print("exhale")
         for row in range(8):
             for x in range(8):
                 sense.set_pixel(x, row, (0, 0, 0))
@@ -223,7 +238,9 @@ def step_2(sense, BP):
     """ returns the new RT measured after the suggested BP
     args : BP of class BreathingPattern"""
     # User has to follow a suggested breathing pattern, plays again to RT game, 
-    # and we measure its new performance 
+    # and we measure its new performance
+    
+    print("Entering step 2") 
     
     inh = BP.get_t_inh()
     exh = BP.get_t_exh()
@@ -233,7 +250,7 @@ def step_2(sense, BP):
     
     new_RT = measure_simple_reaction_time(sense)
     if new_RT is None : 
-        sense.show_message("Failed to measure new reaction time", text_colour= (255, 255, 0), back_colour=(0,0,255), scroll_speed=0.1)
+        print("Failed to measure new reaction time")
         
     return new_RT
 
@@ -244,10 +261,15 @@ def step_2(sense, BP):
 
 def measure_difference_RTs(initial_RT, new_RT): 
     
+    print("Entering measure_difference_RTs")
+    
     i_RT = initial_RT.value
     n_RT = new_RT.value
     
-    return i_RT - n_RT  #not using abs() because we want to make sure that the new is less than the initial  
+    res = i_RT - n_RT
+    print("difference of RTs : ", i_RT, " - ", n_RT," = ", res)
+    
+    return res  #not using abs() because we want to make sure that the new is less than the initial  
 
 
 
@@ -256,20 +278,28 @@ def measure_difference_RTs(initial_RT, new_RT):
 # Exiting the program : 
 
 def check_for_exit(sense, hold_time=5):
-    """Checks if the user holds the center button for `hold_time` seconds to exit."""
+    """Checks if the user holds the stick to the RIGHT for `hold_time` seconds to exit."""
+    
+    
     start_hold_time = None  
-    for event in sense.stick.get_events():
-        if event.action == "pressed" and event.direction == "middle":   #we start counting when the middle button is pressed    
-            start_hold_time = time()
+    event = sense.stick.wait_for_events()
+    
+    if event.action == "pressed" and event.direction == "right":   #we start counting when the right button is pressed    
+        start_hold_time = time()
+        
+    elif event.action == "released" and event.direction == "right" and start_hold_time: #if the button is released before hold_time seconds, reset the timer
+        start_hold_time = None
+        
+    elif event.action == "held" and event.direction == "right" and start_hold_time: #if the button has been held for `hold_time` seconds
+        if time() - start_hold_time >= hold_time:
             
-        elif event.action == "released" and event.direction == "middle" and start_hold_time: #if the button is released before hold_time seconds, reset the timer
-            start_hold_time = None
-            
-        elif event.action == "held" and event.direction == "middle" and start_hold_time: #if the button has been held for `hold_time` seconds
-            if time() - start_hold_time >= hold_time:
-                sense.show_message("Exiting the game", text_colour= (255, 255, 0), back_colour=(0,0,255), scroll_speed=0.1)
-                return True
-    return False           
+            print("Exiting game")
+            sense.show_message("Exit game", text_colour= (255, 255, 0), back_colour=(0,0,255), scroll_speed=0.1)
+            return True
+    
+    
+    return False 
+
 
 
 if __name__ == "__main__":
