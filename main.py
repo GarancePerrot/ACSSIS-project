@@ -21,47 +21,54 @@ def main():
     blue = (0, 0,255)
     yellow = (255, 255, 0)
     
-    program_running = True
 
-    while program_running : 
-        
-        if check_for_exit(sense): #if the player holds the center button for 5 seconds, we exit the program
-            program_running = False 
-            break
     
-        #step 1 : 
-        initial_BP, initial_RT = step_1(sense)
-        sense.clear()
-        print("Set timer")
-        #transition : 
-        set_timer(sense)
+    if check_for_exit(sense): #if the player holds the center button for 5 seconds, we exit the program
+        return
+
+    #step 1 : 
+    initial_BP, initial_RT = step_1(sense)
+    sense.clear()
+    print("Set timer")
+    #transition : 
+    
+    if check_for_exit(sense):  #checking again if player wants to exit
+        return
         
-        #step 2 : 
-        # For now we suggest a fixed BP with 5 seconds inhale and 5 seconds exhale. 
-        # Further improvements : suggest other breathing patterns based on further reseach 
-        # (for e.g with 5 seconds hold between inhale and exhale)
+    set_timer(sense)
+    
+    #step 2 : 
+    # For now we suggest a fixed BP with 5 seconds inhale and 5 seconds exhale. 
+    # Further improvements : suggest other breathing patterns based on further reseach 
+    # (for e.g with 5 seconds hold between inhale and exhale)
+    
+    flag = 1
+    
+    while flag : #user has to follow a BP and play to RT game over and over until its 
+        # RT has been well improved (compared to its initial RT)
         
-        flag = 1
+        if check_for_exit(sense):  #checking again if player wants to exit
+            return
         
-        while flag : #user has to follow a BP and play to RT game over and over until its 
-            # RT has been well improved (compared to its initial RT)
-            
-            if check_for_exit(sense):  #checking again if player wants to exit
-                program_running = False
-                break
-            print("Here")
-            new_BP = BreathingPattern(5,5, 0) # for now we don't have any new suggestions, 
-            # but we still make the user play again to step 2 
-            new_RT = step_2(sense,new_BP)
-            
-            dif = measure_difference_RTs(initial_RT, new_RT)
-            
-            if dif < 0.001 :
-                sense.show_message("New reaction time has been well improved, game stops now.", text_colour=yellow, back_colour=blue, scroll_speed=0.1) 
-                flag = 0
-            else : 
-                sense.show_message("New reaction time is too long, try again with a new breathing pattern suggestion.", text_colour=yellow, back_colour=blue, scroll_speed=0.1)
-        #end while
+        print("Here")
+        new_BP = BreathingPattern(5,5, 0) # for now we don't have any new suggestions, 
+        # but we still make the user play again to step 2 
+        new_RT = step_2(sense,new_BP)
+        
+        
+        
+        if check_for_exit(sense):  #checking again if player wants to exit
+            return
+        
+        dif = measure_difference_RTs(initial_RT, new_RT)
+        
+        
+        
+        if dif < 0.001 :
+            sense.show_message("New reaction time has been well improved, game stops now.", text_colour=yellow, back_colour=blue, scroll_speed=0.1) 
+            flag = 0
+        else : 
+            sense.show_message("New reaction time is too long, try again with a new breathing pattern suggestion.", text_colour=yellow, back_colour=blue, scroll_speed=0.1)
     #end while
     
     sense.clear()    
@@ -220,7 +227,7 @@ def suggested_BP(sense, duration=20, t_inh=5, t_exh=5, t_hold=0): #void called i
         for row in range(7, -1, -1): #reverse iteration
             for x in range(8):
                 sense.set_pixel(x, row, (255, 255, 255))
-                sleep(ti) 
+                sleep(0.001) 
            
         print("hold")     
         #HOLD : 
