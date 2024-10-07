@@ -64,11 +64,11 @@ def main():
         
         
         
-        if dif < 0.001 :
-            sense.show_message("New reaction time has been well improved, game stops now.", text_colour=yellow, back_colour=blue, scroll_speed=0.1) 
+        if dif < 0.1 :
+            sense.show_message("End.", text_colour=yellow, back_colour=blue, scroll_speed=0.1) 
             flag = 0
         else : 
-            sense.show_message("New reaction time is too long, try again with a new breathing pattern suggestion.", text_colour=yellow, back_colour=blue, scroll_speed=0.1)
+            sense.show_message("Try again.", text_colour=yellow, back_colour=blue, scroll_speed=0.1)
     #end while
     
     sense.clear()    
