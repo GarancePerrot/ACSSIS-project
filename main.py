@@ -35,7 +35,7 @@ def main():
     if check_for_exit(sense):  #checking again if player wants to exit
         return
         
-    set_timer(sense)
+    set_timer(sense,10)
     
     #step 2 : 
     # For now we suggest a fixed BP with 5 seconds inhale and 5 seconds exhale. 
@@ -51,7 +51,7 @@ def main():
             return
         
         print("Here")
-        new_BP = BreathingPattern(5,5, 0) # for now we don't have any new suggestions, 
+        new_BP = BreathingPattern(1,1, 1) # for now we don't have any new suggestions, 
         # but we still make the user play again to step 2 
         new_RT = step_2(sense,new_BP)
         
