@@ -31,7 +31,8 @@ def main():
     
         #step 1 : 
         initial_BP, initial_RT = step_1(sense)
-        
+        sense.clear()
+        print("Set timer")
         #transition : 
         set_timer(sense)
         
@@ -48,10 +49,10 @@ def main():
             if check_for_exit(sense):  #checking again if player wants to exit
                 program_running = False
                 break
-            
+            print("Here")
             new_BP = BreathingPattern(5,5, 0) # for now we don't have any new suggestions, 
             # but we still make the user play again to step 2 
-            new_RT = step_2(new_BP)
+            new_RT = step_2(sense,new_BP)
             
             dif = measure_difference_RTs(initial_RT, new_RT)
             
@@ -282,7 +283,7 @@ def check_for_exit(sense, hold_time=5):
     
     
     start_hold_time = None  
-    event = sense.stick.wait_for_events()
+    event = sense.stick.wait_for_event()
     
     if event.action == "pressed" and event.direction == "right":   #we start counting when the right button is pressed    
         start_hold_time = time()
