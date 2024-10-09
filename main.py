@@ -21,7 +21,25 @@ def main():
     blue = (0, 0,255)
     yellow = (255, 255, 0)
     
+    sense.clear()
+    # Define some colours
+    g = (0, 255, 0) # Green
+    b = (0, 0, 0) # Black
 
+    # Set up where each colour will display
+    creeper_pixels = [
+        g, b, b, b, b, b, b, b,
+        b, g, b, b, b, b, b, b,
+        b, b, g, b, b, b, g, b,
+        b, b, b, g, b, b, g, b,
+        b, b, b, b, g, b, g, b,
+        b, b, b, b, b, g, g, b,
+        b, b, g, g, g, g, g, b,
+        b, b, b, b, b, b, b, b
+    ]
+
+    # Display these colours on the LED matrix
+    sense.set_pixels(creeper_pixels)
     
     if check_for_exit(sense): #if the player holds the center button for 5 seconds, we exit the program
         sense.show_message("End.", text_colour=yellow, back_colour=blue, scroll_speed=0.1)
@@ -37,6 +55,7 @@ def main():
     sense.clear()
     print("Set timer")
     #transition : 
+    sense.set_pixels(creeper_pixels)
     
     if check_for_exit(sense):  #checking again if player wants to exit
         sense.show_message("End.", text_colour=yellow, back_colour=blue, scroll_speed=0.1)
@@ -56,13 +75,13 @@ def main():
     
     while flag : #user has to follow a BP and play to RT game over and over until its 
         # RT has been well improved (compared to its initial RT)
-        
+        sense.set_pixels(creeper_pixels)
         if check_for_exit(sense):  #checking again if player wants to exit
             sense.show_message("End.", text_colour=yellow, back_colour=blue, scroll_speed=0.1)
             return
         
         print("Here")
-        new_BP = BreathingPattern(1,1, 1) # for now we don't have any new suggestions, 
+        new_BP = BreathingPattern(0.8,0.8, 0.8) # for now we don't have any new suggestions, 
         # but we still make the user play again to step 2 
         new_RT = step_2(sense,new_BP)
         
@@ -75,10 +94,8 @@ def main():
         if check_for_exit(sense):  #checking again if player wants to exit
             sense.show_message("End.", text_colour=yellow, back_colour=blue, scroll_speed=0.1)
             return
-        
-        # dif = measure_difference_RTs(initial_RT, new_RT)
-        if 0.75 * initial_RT - new_RT >= 0:  #success condition : initial RT has been reduced by at least 25%
-        # if dif >= 0.1 :
+
+        if dif > 0.00001 :
             sense.show_message("End.", text_colour=yellow, back_colour=blue, scroll_speed=0.1) 
             flag = 0
         else : 
@@ -114,17 +131,101 @@ def deduce_breathing_pattern(sense, duration=10):
     inhaling_times = []
     exhaling_times = []
     sense.clear()
+    g = (0, 255, 0) # Green
+    b = (0, 0, 0) # Black
+    r = (255,0,0) #red
+
+    # Set up where each colour will display
+    clear_pixels = [
+        b, b, b, b, b, b, b, b,
+        b, b, b, b, b, b, b, b,
+        b, b, b, b, b, b, b, b,
+        b, b, b, b, b, b, b, b,
+        b, b, b, b, b, b, b, b,
+        b, b, b, b, b, b, b, b,
+        b, b, b, b, b, b, b, b,
+        b, b, b, b, b, b, b, b
+    ]
+    inhale_exhale_pixels = [
+        b, b, b, g, b, b, b, b,
+        b, b, g, g, g, b, b, b,
+        b, g, b, g, b, g, b, b,
+        b, b, b, g, b, b, b, b,
+        b, g, b, g, b, g, b, b,
+        b, b, g, g, g, b, b, b,
+        b, b, b, g, b, b, b, b,
+        b, b, b, b, b, b, b, b
+    ]
+    inhale_pixels = [
+        b, b, b, b, b, b, b, b,
+        b, b, b, g, b, b, b, b,
+        b, b, g, g, g, b, b, b,
+        b, g, b, g, b, g, b, b,
+        b, b, b, g, b, b, b, b,
+        b, b, b, g, b, b, b, b,
+        b, b, b, g, b, b, b, b,
+        b, b, b, g, b, b, b, b
+    ]
+    exhale_pixels = [
+        b, b, b, g, b, b, b, b,
+        b, b, b, g, b, b, b, b,
+        b, b, b, g, b, b, b, b,
+        b, b, b, g, b, b, b, b,
+        b, g, b, g, b, g, b, b,
+        b, b, g, g, g, b, b, b,
+        b, b, b, g, b, b, b, b,
+        b, b, b, b, b, b, b, b
+    ]
+    wrong_pixels = [
+        r, b, b, b, b, b, b, r,
+        b, r, b, b, b, b, r, b,
+        b, b, r, b, b, r, b, b,
+        b, b, b, r, r, b, b, b,
+        b, b, b, r, r, b, b, b,
+        b, b, r, b, b, r, b, b,
+        b, r, b, b, b, b, r, b,
+        r, b, b, b, b, b, b, r
+    ]
+    done_pixels = [
+        b, b, b, b, b, b, b, b,
+        b, b, b, b, b, b, b, b,
+        b, b, b, b, b, b, g, b,
+        b, b, b, b, b, g, b, b,
+        g, b, b, b, g, b, b, b,
+        b, g, b, g, b, b, b, b,
+        b, b, g, b, b, b, b, b,
+        b, b, b, b, b, b, b, b
+    ]
+
+    # Display these colours on the LED matrix
+    sense.set_pixels(inhale_exhale_pixels)
     #continuously waiting for button press (during specified duration)
     while time() - start_time < duration:
         event= sense.stick.wait_for_event()
         if event.action == "pressed":          #user input : 
             if event.direction == "up":  # User pressed up arrow, start inhaling
                 print("Inhale")
+                sense.set_pixels(inhale_pixels)
                 inhaling_times.append(time() - start_time)
+                for event in sense.stick.get_events():
+                    print("ignoring joystick events",event)
             elif event.direction == "down":  # User pressed down arrow, start exhaling
                 print("Exhale")
+                sense.set_pixels(exhale_pixels)
                 exhaling_times.append(time() - start_time)
+                for event in sense.stick.get_events():
+                    print("ignoring joystick events",event)
+            else:
+                sense.set_pixels(wrong_pixels)
+                for event in sense.stick.get_events():
+                    print("ignoring joystick events",event)
+    for event in sense.stick.get_events():
+        print("ignoring joystick events", event)
+    sense.set_pixels(done_pixels)
+    sleep(1)                        
     print ("Done.. calculating")
+    for event in sense.stick.get_events():
+        print("ignoring joystick events", event)
     #doing a mean of I and E times over the period, and then storing this information
     if inhaling_times and exhaling_times:
         mean_inhaling_time = sum(inhaling_times) / len(inhaling_times)
@@ -145,34 +246,72 @@ def measure_simple_reaction_time(sense, duration=15):
     """
     
     print("Entering measure_simple_reaction_time\n")
-
+    for event in sense.stick.get_events():
+        print("ignoring joystick events", event)
     start_time = time()
     reaction_times = []
+    g = (0, 255, 0) # Green
+    b = (0, 0, 0) # Black
 
+    # Set up where each colour will display
+    creeper_pixels = [
+        g, b, b, b, b, b, b, b,
+        b, g, b, b, b, b, b, b,
+        b, b, g, b, b, b, g, b,
+        b, b, b, g, b, b, g, b,
+        b, b, b, b, g, b, g, b,
+        b, b, b, b, b, g, g, b,
+        b, b, g, g, g, g, g, b,
+        b, b, b, b, b, b, b, b
+    ]
+    done_pixels = [
+        b, b, b, b, b, b, b, b,
+        b, b, b, b, b, b, b, b,
+        b, b, b, b, b, b, g, b,
+        b, b, b, b, b, g, b, b,
+        g, b, b, b, g, b, b, b,
+        b, g, b, g, b, b, b, b,
+        b, b, g, b, b, b, b, b,
+        b, b, b, b, b, b, b, b
+    ]
+
+    # Display these colours on the LED matrix
+    sense.set_pixels(creeper_pixels)
+    if check_for_exit(sense): #if the player holds the center button for 5 seconds, we exit the program
+        return
     while time() - start_time < duration:
+        sense.clear()
         
-        if check_for_exit(sense): #if the player holds the center button for 5 seconds, we exit the program
-            return None
-        
-        #random delay between 1 and 3 seconds : 
-        delay = randint(1, 3)  
-        sleep(delay)
+        #random delay between 1 and 2 seconds : 
+        delay = randint(1, 2)  
+        sleep(0.3)
         #randomly light up a LED : 
         x, y = randint(0, 7), randint(0, 7) #random coordinates for a LED
-        sense.set_pixel(x, y, (255, 255, 255)) # sets pixel to white
+        sense.set_pixel(x, y, (254, 254, 254)) # sets pixel to white
+        
         led_on_time = time()
-
+        #sleep(delay)
+        print("here waiting for press" , x, y)
         #we wait for the user to press the Enter key : 
-        event = sense.stick.wait_for_event()
-        if event.action == "pressed":
-            RT = time() - led_on_time
-            reaction_times.append(RT)
-            sense.clear() # lights off the pixel
+        while True:
+            event = sense.stick.wait_for_event()
+            if event.action == "released":
+                RT = time() - led_on_time
+                reaction_times.append(RT)
+                print("pressed")
+                break
+                #sense.clear() # lights off the pixel
+            else:
+                print(event)
+                for event in sense.stick.get_events():
+                    print("ignoring joystick events",event) 
 
     # we compute the mean of the reaction times over the period and store it : 
     if reaction_times:
         mean_RT = sum(reaction_times) / len(reaction_times)
         print("computed mean RT : ", mean_RT )
+        sense.set_pixels(done_pixels)
+        sleep(1)
         return SimpleRT(mean_RT)
     else:
         print("Error: measure_simple_RT")
@@ -218,6 +357,7 @@ def set_timer(sense, seconds=60):
     
     sense.show_message("Relax",text_colour= (255, 255, 0), back_colour=(0,0,255), scroll_speed=0.1)
     sleep(seconds)
+    sense.clear()
     return 0
     
     
@@ -242,7 +382,12 @@ def suggested_BP(sense, duration=20, t_inh=5, t_exh=5, t_hold=0): #void called i
     print("Entering suggested_BP")
     
     start_time = time()
-    
+
+   
+   # divide the whole inhaling or exhaling time by 8 (nb rows) to light up at a regular pace
+    ti = t_inh/8
+    te = t_exh/8
+    sense.clear()
     
     while time() - start_time < duration:
         
@@ -255,7 +400,7 @@ def suggested_BP(sense, duration=20, t_inh=5, t_exh=5, t_hold=0): #void called i
         for row in range(7, -1, -1): #reverse iteration
             for x in range(8):
                 sense.set_pixel(x, row, (255, 255, 255))
-                sleep(0.01) 
+                sleep(ti) 
            
         print("hold")     
         #HOLD : 
@@ -286,7 +431,29 @@ def step_2(sense, BP):
     res = suggested_BP(sense, duration = 20, t_inh=inh, t_exh=exh, t_hold=hold) 
     if res == 1:
         print("Exit")
-        return None
+        return None 
+    g = (0, 255, 0) # Green
+    b = (0, 0, 0) # Black
+
+    # Set up where each colour will display
+    creeper_pixels = [
+        g, b, b, b, b, b, b, b,
+        b, g, b, b, b, b, b, b,
+        b, b, g, b, b, b, g, b,
+        b, b, b, g, b, b, g, b,
+        b, b, b, b, g, b, g, b,
+        b, b, b, b, b, g, g, b,
+        b, b, g, g, g, g, g, b,
+        b, b, b, b, b, b, b, b
+    ]
+    sense.clear()
+    # Display these colours on the LED matrix
+    sense.set_pixels(creeper_pixels)
+    
+
+    if check_for_exit(sense): #if the player holds the center button for 5 seconds, we exit the program
+        return
+   
     
     new_RT = measure_simple_reaction_time(sense)
     if new_RT is None : 
@@ -337,7 +504,8 @@ def check_for_exit(sense, hold_time=5):
             sense.show_message("Exit game", text_colour= (255, 255, 0), back_colour=(0,0,255), scroll_speed=0.1)
             return True
     
-    
+    for event in sense.stick.get_events():
+        print("ignoring joystick events")
     return False 
 
 
