@@ -61,7 +61,7 @@ def main():
         sense.show_message("End.", text_colour=yellow, back_colour=blue, scroll_speed=0.1)
         return
         
-    res = set_timer(sense,10)
+    res = set_timer(sense, 4)
     if res == 1:
         sense.show_message("End.", text_colour=yellow, back_colour=blue, scroll_speed=0.1)
         return
@@ -91,11 +91,13 @@ def main():
             return
             
         
-        if check_for_exit(sense):  #checking again if player wants to exit
-            sense.show_message("End.", text_colour=yellow, back_colour=blue, scroll_speed=0.1)
-            return
+        #if check_for_exit(sense):  #checking again if player wants to exit
+        #    sense.show_message("End.", text_colour=yellow, back_colour=blue, scroll_speed=0.1)
+        #    return
+        
 
-        if dif > 0.00001 :
+        #some improvement found
+        if measure_difference_RTs(initial_RT, new_RT) > 0.00001 :
             sense.show_message("End.", text_colour=yellow, back_colour=blue, scroll_speed=0.1) 
             flag = 0
         else : 
@@ -323,8 +325,8 @@ def step_1(sense): #returns the initial BP and RT
     
     print("Entering step 1")
     
-    if check_for_exit(sense): #if the player holds the center button for 5 seconds, we exit the program
-        return None, None
+    # if check_for_exit(sense): #if the player holds the center button for 5 seconds, we exit the program
+    #    return None, None
     
     # Tracking the player’s initial breathing & reaction time 
     BP = deduce_breathing_pattern(sense)
@@ -391,10 +393,6 @@ def suggested_BP(sense, duration=20, t_inh=5, t_exh=5, t_hold=0): #void called i
     
     while time() - start_time < duration:
         
-        if check_for_exit(sense):  #checking again if player wants to exit
-            return 1
-        
-        
         # INHALE : light up the rows from bottom to top
         print("inhale")
         for row in range(7, -1, -1): #reverse iteration
@@ -402,7 +400,7 @@ def suggested_BP(sense, duration=20, t_inh=5, t_exh=5, t_hold=0): #void called i
                 sense.set_pixel(x, row, (255, 255, 255))
                 sleep(ti) 
            
-        print("hold")     
+        print("hold for ", t_hold)     
         #HOLD : 
         sleep(t_hold)
 
@@ -411,7 +409,8 @@ def suggested_BP(sense, duration=20, t_inh=5, t_exh=5, t_hold=0): #void called i
         for row in range(8):
             for x in range(8):
                 sense.set_pixel(x, row, (0, 0, 0))
-                sleep(0.01)
+                sleep(te)
+    print("Done from breating")
     return 0
 
 
@@ -449,6 +448,7 @@ def step_2(sense, BP):
     sense.clear()
     # Display these colours on the LED matrix
     sense.set_pixels(creeper_pixels)
+    sleep(0.1)
     
 
     if check_for_exit(sense): #if the player holds the center button for 5 seconds, we exit the program
@@ -466,17 +466,13 @@ def step_2(sense, BP):
 #________________________________________________________________________________________________________
 # Measuring performance : 
 
-# def measure_difference_RTs(initial_RT, new_RT): 
-    
-#     print("Entering measure_difference_RTs")
-    
-#     i_RT = initial_RT.value
-#     n_RT = new_RT.value
-    
-#     res = i_RT - n_RT
-#     print("difference of RTs : ", i_RT, " - ", n_RT," = ", res)
-    
-#     return res  #not using abs() because we want to make sure that the new is less than the initial  
+def measure_difference_RTs(initial_RT, new_RT): 
+    print("Entering measure_difference_RTs")
+    i_RT = initial_RT.value
+    n_RT = new_RT.value
+    res = i_RT - n_RT
+    print("difference of RTs : ", i_RT, " - ", n_RT," = ", res)
+    return res  #not using abs() because we want to make sure that the new is less than the initial  
 
 
 
