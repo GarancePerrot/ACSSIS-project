@@ -81,8 +81,14 @@ def main():
             return
         
         print("Here")
-        new_BP = BreathingPattern(0.8,0.8, 0.8) # for now we don't have any new suggestions, 
-        # but we still make the user play again to step 2 
+        new_BP = BreathingPattern(0.8,0.8, 0.8) 
+        
+        # other suggestions of BP(inhale, exhale, hold)
+        BreathingPattern(5,5,0)
+        BreathingPattern(6,6,0)
+        BreathingPattern(5,7,0)
+        BreathingPattern(4,2,6)
+        BreathingPattern(3,6,0)
         new_RT = step_2(sense,new_BP)
         
         if new_RT is None :
@@ -97,7 +103,8 @@ def main():
         
 
         #some improvement found
-        if measure_difference_RTs(initial_RT, new_RT) > 0.00001 :
+        if new_RT.value <= 0.75*initial_RT.value:  #initial RT has been reduced by at least 25%
+        #if measure_difference_RTs(initial_RT, new_RT) > 0.00001 :
             sense.show_message("End.", text_colour=yellow, back_colour=blue, scroll_speed=0.1) 
             flag = 0
         else : 
