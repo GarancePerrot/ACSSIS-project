@@ -84,11 +84,11 @@ def main():
         new_BP = BreathingPattern(0.8,0.8, 0.8) 
         
         # other suggestions of BP(inhale, exhale, hold)
-        BreathingPattern(5,5,0)
-        BreathingPattern(6,6,0)
-        BreathingPattern(5,7,0)
-        BreathingPattern(4,2,6)
-        BreathingPattern(3,6,0)
+        # BreathingPattern(5,5,0)
+        # BreathingPattern(6,6,0)
+        # BreathingPattern(5,7,0)
+        # BreathingPattern(4,2,6)
+        # BreathingPattern(3,6,0)
         new_RT = step_2(sense,new_BP)
         
         if new_RT is None :
