@@ -103,7 +103,7 @@ def main():
         
 
         #some improvement found
-        if new_RT.value <= 0.75*initial_RT.value:  #initial RT has been reduced by at least 25%
+        if new_RT.value <= 0.95*initial_RT.value:  #initial RT has been reduced by at least 5%
         #if measure_difference_RTs(initial_RT, new_RT) > 0.00001 :
             sense.show_message("End.", text_colour=yellow, back_colour=blue, scroll_speed=0.1) 
             flag = 0
