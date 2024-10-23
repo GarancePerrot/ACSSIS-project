@@ -3,11 +3,9 @@ from time import time, sleep
 from random import randint
 from classes import *
 
-        
-        
 
-
-# ___________________________________________________________________________________________
+# URL: https://github.com/GarancePerrot/ACSSIS-project
+#______________________________________________________________________________________________________________
 
 def main():
     """Does the experiment"""
