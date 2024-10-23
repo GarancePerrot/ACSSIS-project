@@ -12,7 +12,6 @@ from classes import *
 def main():
     """Does the experiment"""
     sense = SenseHat()
-      
     # RGB colors and their complements
     red = (255,0,0)
     cyan = (0,255,255)
@@ -81,7 +80,7 @@ def main():
             return
         
         print("Here")
-        new_BP = BreathingPattern(0.8,0.8, 0.8) 
+        new_BP = BreathingPattern(5,5,0)
         
         # other suggestions of BP(inhale, exhale, hold)
         # BreathingPattern(5,5,0)
@@ -343,7 +342,7 @@ def step_1(sense): #returns the initial BP and RT
     
     # for now we are just using a simple RT 
     # further improvements : do experiments for recognition RT and choice RT 
-    RT = measure_simple_reaction_time(sense)
+    RT = measure_simple_reaction_time(sense,20)
     if RT is None : 
         print("Exit or failed to measure initial reaction time")
         return None, None
@@ -374,7 +373,7 @@ def set_timer(sense, seconds=60):
 # STEP 2 : 
 
 
-def suggested_BP(sense, duration=20, t_inh=5, t_exh=5, t_hold=0): #void called in step 2
+def suggested_BP(sense, duration=30, t_inh=5, t_exh=5, t_hold=0): #void called in step 2
     """Suggests a breathing pattern where the rows of LED matrix light up 
     and down according to the inhaling time t_inh and exhaling time t_exh. 
     args: duration (int): The duration in seconds, default 20 sec
@@ -394,8 +393,8 @@ def suggested_BP(sense, duration=20, t_inh=5, t_exh=5, t_hold=0): #void called i
 
    
    # divide the whole inhaling or exhaling time by 8 (nb rows) to light up at a regular pace
-    ti = t_inh/8
-    te = t_exh/8
+    ti = t_inh/64
+    te = t_exh/64
     sense.clear()
     
     while time() - start_time < duration:
@@ -405,6 +404,7 @@ def suggested_BP(sense, duration=20, t_inh=5, t_exh=5, t_hold=0): #void called i
         for row in range(7, -1, -1): #reverse iteration
             for x in range(8):
                 sense.set_pixel(x, row, (255, 255, 255))
+
                 sleep(ti) 
            
         print("hold for ", t_hold)     
@@ -462,7 +462,7 @@ def step_2(sense, BP):
         return
    
     
-    new_RT = measure_simple_reaction_time(sense)
+    new_RT = measure_simple_reaction_time(sense,20)
     if new_RT is None : 
         print("Failed to measure new reaction time")
         
